@@ -36,6 +36,7 @@ var data = {
   GOOGLE_CLIENT_ID: config.google.clientID,
   DROPBOX_APP_KEY: config.dropbox.clientSecret
 }
+var rootPath = '/' + (config.urlpath || '')
 
 ejs.renderFile(constpath, data, {}, function (err, str) {
   if (err) throw new Error(err)
@@ -115,7 +116,7 @@ app.use(i18n.init)
 
 // routes without sessions
 // static files
-app.use('/', express.static(path.join(__dirname, '/public'), { maxAge: config.staticcachetime }))
+app.use(rootPath, express.static(path.join(__dirname, '/public'), { maxAge: config.staticcachetime }))
 
 // session
 app.use(session({
@@ -125,7 +126,8 @@ app.use(session({
   saveUninitialized: true, // always create session to ensure the origin
   rolling: true, // reset maxAge on every response
   cookie: {
-    maxAge: config.sessionlife
+    maxAge: config.sessionlife,
+    path: rootPath
   },
   store: sessionStore
 }))
@@ -162,13 +164,13 @@ app.engine('ejs', ejs.renderFile)
 // set view engine
 app.set('view engine', 'ejs')
 
-app.use(require('./lib/web/baseRouter'))
-app.use(require('./lib/web/statusRouter'))
-app.use(require('./lib/web/auth'))
-app.use(require('./lib/web/historyRouter'))
-app.use(require('./lib/web/userRouter'))
-app.use(require('./lib/web/imageRouter'))
-app.use(require('./lib/web/noteRouter'))
+app.use(rootPath, require('./lib/web/baseRouter'))
+app.use(rootPath, require('./lib/web/statusRouter'))
+app.use(rootPath, require('./lib/web/auth'))
+app.use(rootPath, require('./lib/web/historyRouter'))
+app.use(rootPath, require('./lib/web/userRouter'))
+app.use(rootPath, require('./lib/web/imageRouter'))
+app.use(rootPath, require('./lib/web/noteRouter'))
 
 // response not found if no any route matxches
 app.get('*', function (req, res) {
